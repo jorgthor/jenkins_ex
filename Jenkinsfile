@@ -4,7 +4,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh 'python -m py_compile main.py functions.py'
+                sh 'python3 -m py_compile main.py functions.py'
             }
         }
         stage('Test') {
