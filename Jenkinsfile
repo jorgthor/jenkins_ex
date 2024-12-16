@@ -10,12 +10,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
-                sh 'python3 -m unittest discover -s tests -p "*_test.py" --junit-xml test-reports/results.xml'
-            }
-            post {
-                always {
-                    junit 'test-reports/*.xml'
-                }
+                sh 'python3 -m unittest discover'
             }
         }
     }
