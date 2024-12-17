@@ -1,42 +1,72 @@
 pipeline {
-    agent { dockerfile true }
-    def dockerAccount = 'jorgthor'
-    def appName = jenkins_ex
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "jorgthor/jenkins_ex"
+        DOCKER_CREDENTIALS = "docker-hub-credentials" // Jenkins credentials ID
+        //GITHUB_REPO = "https://github.com/your-username/your-repo.git"
+        DOCKER_TAG = "latest"
+    }
+
     stages {
-        stage('Checkout') {
+
+        stage('Checkout Code') {
             steps {
-                echo 'Checking out code..'
+                echo "Pulling code from GitHub..."
                 checkout scm
             }
         }
-        stage('Test') {
+
+        stage('Run Tests') {
             steps {
-                echo 'Testing..'
-                sh 'python3 -m unittest tests/test_main.py tests/test_functions.py'
+                echo "Running tests with unittest..."
+                sh '''
+                python3 -m unittest discover -s tests -p "test_*.py"
+                '''
             }
         }
-        stage('Build') {
+
+        stage('Build Docker Image') {
             steps {
-                echo 'Building..'
-                app = docker.build("${dockerAccount}/${appName}")
+                echo "Building Docker image..."
+                sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
             }
         }
-        stage('Push to DockerHub') {
+
+        stage('Push Docker Image to Hub') {
             steps {
-                echo 'Pushing to Dockerhub....'
-                docker.withRegistry('https://index.docker.io/v1/', $dockerAccount) {
-                    app.push("${env.BUILD_NUMBER}")
-                    app.push("latest")
+                echo "Pushing Docker image to Docker Hub..."
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo "*** Logging into Docker Hub ***"
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    echo "*** Pushing Docker Image ***"
+                    docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    '''
                 }
             }
         }
-        stage('Cleanup') {
+
+        stage('Clean Up') {
             steps {
-                echo 'Cleaning up..'
-                script {
-                    app.remove()
-                }
+                echo "Cleaning up local Docker images and workspace..."
+                sh '''
+                docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
+                rm -rf venv
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed. Check the logs for errors."
+        }
+        always {
+            echo "Pipeline finished."
         }
     }
 }
