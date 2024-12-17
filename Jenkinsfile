@@ -12,7 +12,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
-                sh 'python3 -m unittest discover'
+                sh 'python3 -m unittest tests/test_main.py tests/test_functions.py'
             }
         }
         stage('Build') {
@@ -33,7 +33,9 @@ pipeline {
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up..'
-                app.remove()
+                script {
+                    app.remove()
+                }
             }
         }
     }
