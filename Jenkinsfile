@@ -17,23 +17,10 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                echo "Installing dependencies..."
-                sh '''
-                python3 -m venv venv
-                source venv/bin/activate
-                pip install --upgrade pip
-                pip install unittest
-                '''
-            }
-        }
-
         stage('Run Tests') {
             steps {
                 echo "Running tests..."
                 sh '''
-                source venv/bin/activate
                 unittest tests/test_main.py
                 unittest tests/test_functions.py
                 '''
