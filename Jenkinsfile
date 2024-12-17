@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "jorgthor/jenkins_ex"
+        DOCKER_IMAGE = "your-dockerhub-username/your-image-name"
         DOCKER_CREDENTIALS = "docker-hub-credentials" // Jenkins credentials ID
         //GITHUB_REPO = "https://github.com/your-username/your-repo.git"
         DOCKER_TAG = "latest"
@@ -19,10 +19,9 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                echo "Running tests..."
+                echo "Running tests with unittest..."
                 sh '''
-                unittest tests/test_main.py
-                unittest tests/test_functions.py
+                python -m unittest discover -s tests -p "test_*.py"
                 '''
             }
         }
