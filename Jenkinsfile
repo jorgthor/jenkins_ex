@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "your-dockerhub-username/your-image-name"
+        DOCKER_IMAGE = "jorgthor/jenkins_ex"
         DOCKER_CREDENTIALS = "docker-hub-credentials" // Jenkins credentials ID
         //GITHUB_REPO = "https://github.com/your-username/your-repo.git"
         DOCKER_TAG = "latest"
